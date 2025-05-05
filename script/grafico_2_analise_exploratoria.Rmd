@@ -1,0 +1,87 @@
+---
+title: "Análise dos Grupos Ocupacionais no Executivo Federal"
+author: "Caio César Ponte"
+output: github_document
+---
+
+## 📦 Requisitos para executar este arquivo
+
+Antes de renderizar este `.Rmd`, instale os seguintes pacotes no seu R ou RStudio:
+
+```r
+install.packages("tidyverse", dependencies = TRUE)
+install.packages("janitor")
+```
+
+Você só precisa fazer isso uma vez. Após a instalação, clique em **Knit** para gerar o relatório normalmente.
+
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(janitor)
+```
+
+## Contextualização
+
+Esta análise explora os dados do Gráfico 2 da Consulta 169 (IPEA), que tratam da proporção de vínculos por grande grupo ocupacional no Executivo Federal entre 2003 e 2018. O objetivo é entender como a composição do funcionalismo público tem se transformado ao longo do tempo com base em proporções percentuais.
+
+## Importação e limpeza dos dados
+
+```{r}
+dados <- read_csv("data/3136-20210203executivofederalgraficos12.csv") |>
+  clean_names()
+
+head(dados)
+```
+
+## Dicionário de dados
+
+| Variável                     | Tipo                  | Descrição                                                                |
+| ---------------------------- | --------------------- | ------------------------------------------------------------------------ |
+| `ano`                        | Numérica discreta     | Ano de referência do dado (2003 a 2018).                                 |
+| `cod_grande_grupo`           | Numérica discreta     | Código identificador do grande grupo ocupacional (1 a 9).                |
+| `descricao_grande_grupo`     | Categórica nominal    | Nome completo do grande grupo ocupacional segundo classificação do IPEA. |
+| `vinculos_executivo_federal` | Numérica inteira      | Quantidade de vínculos formais registrados no Executivo Federal.         |
+| `total_ano`                  | Numérica inteira      | Total de vínculos no Executivo Federal no respectivo ano.                |
+| `perc`                       | Numérica contínua (%) | Proporção do grupo em relação ao total do ano (em porcentagem).          |
+
+## Visualização: Proporção por Grande Grupo
+
+```{r}
+ggplot(dados, aes(x = ano, y = perc, color = descricao_grande_grupo)) +
+  geom_line(size = 1) +
+  labs(
+    title = "Proporção de Vínculos por Grande Grupo (2003–2018)",
+    x = "Ano",
+    y = "Proporção (%)",
+    color = "Grande Grupo"
+  ) +
+  theme_minimal()
+```
+
+## Visualização com Facetas (análise detalhada por grupo)
+
+```{r}
+ggplot(dados, aes(x = ano, y = perc)) +
+  geom_line(color = "steelblue") +
+  facet_wrap(~ descricao_grande_grupo, scales = "free_y") +
+  labs(
+    title = "Evolução por Grande Grupo (2003–2018)",
+    x = "Ano",
+    y = "Proporção (%)"
+  ) +
+  theme_minimal()
+```
+
+## Interpretação Inicial
+
+> O gráfico geral sugere crescimento na proporção de vínculos do grupo “Profissionais”, enquanto outros grupos, como “Serviços Administrativos”, apresentam tendência de retração. A visualização por facetas permite observar nuances específicas de cada grupo e também identificar anomalias ou padrões instáveis nos dados originais, que deverão ser analisados com mais atenção nas etapas seguintes.
+
+## 🔗 Conexão com o Ensaio
+
+As representações visuais apresentadas estão alinhadas com as hipóteses discutidas no ensaio *“A Trajetória Ocupacional do Serviço Público - Executivo Federal”*. Observa-se, por exemplo, um crescimento contínuo na proporção do grupo **Profissionais das Ciências e das Artes**, o que pode estar relacionado a uma valorização de perfis mais qualificados no serviço público ao longo do período analisado. 
+
+De forma complementar, alguns grupos ligados a funções operacionais, como **Serviços Administrativos** e **Serviços e Comércio**, apresentam oscilações ou quedas que, à primeira vista, levantam hipóteses sobre transformações estruturais, como modernização ou terceirização. 
+
+Tais tendências visuais oferecem um ponto de partida empírico relevante para sustentar os argumentos do ensaio, mas exigem aprofundamento na análise das Tabelas 2 e 3, que detalham as ocupações específicas dentro desses grandes grupos.

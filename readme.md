@@ -34,7 +34,6 @@ Este projeto serve como:
 ```
 ├── dados/ # Planilhas e dados utilizados (quando possível)
 ├── scripts/ # Códigos R para análise e visualização
-├── imagens/ # Gráficos gerados
 ├── ensaio.md # Texto completo do ensaio
 ├── README.md # Esta explicação
 ```
