@@ -1,0 +1,118 @@
+---
+title: "Dinâmica Ocupacional no Poder Executivo Federal Brasileiro"
+author: "Caio César Ponte"
+output: github_document
+---
+
+## 📦 Requisitos para executar este arquivo
+
+Antes de renderizar este `.Rmd`, instale os seguintes pacotes:
+
+```r
+install.packages("tidyverse", dependencies = TRUE)
+install.packages("janitor")
+```
+
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(janitor)
+```
+
+## Contextualização
+
+Esta análise complementa a discussão do ensaio *“A Trajetória Ocupacional do Serviço Público - Executivo Federal”*, utilizando as Tabelas 2 e 3 da Consulta 169. Elas mostram as ocupações com maior **crescimento** e **queda absoluta** de vínculos no Executivo Federal entre 2003 e 2018.
+
+## Importação e limpeza dos dados
+
+```{r}
+data <- read_csv("data/7456-20210203executivofederaltabelas123.csv") |>
+  clean_names()
+
+head(data)
+```
+
+## 📘 Dicionário de Dados
+
+| Variável             | Tipo                  | Descrição                                                                 |
+|----------------------|-----------------------|---------------------------------------------------------------------------|
+| `year`               | Numérica discreta     | Ano de referência (sempre 2018 para esta tabela comparativa).            |
+| `cbo2002`            | Categórica numérica   | Código da ocupação segundo a Classificação Brasileira de Ocupações 2002. |
+| `occupation`         | Categórica nominal    | Nome da família ocupacional.                                             |
+| `links_2018`         | Numérica inteira      | Total de vínculos em 2018 para essa ocupação.                            |
+| `links_2003`         | Numérica inteira      | Total de vínculos em 2003 para essa ocupação.                            |
+| `group_code`         | Numérica discreta     | Código do grande grupo funcional.                                        |
+| `group_name`         | Categórica nominal    | Nome do grande grupo funcional.                                          |
+| `absolute_diff`      | Numérica inteira      | Diferença absoluta de vínculos (2018 - 2003).                            |
+| `percentage_var`     | Numérica contínua (%) | Variação percentual no número de vínculos entre 2003 e 2018.             |
+
+## Tabela 2: Top 25 Ocupações com Maior Crescimento Absoluto
+
+```{r}
+table2 <- data |>
+  rename(
+    year = ano,
+    occupation = ocupacao,
+    links_2018 = vinculos2018,
+    links_2003 = vinculos2003,
+    group_code = codigo_gg,
+    group_name = grande_grupo,
+    absolute_diff = diferenca,
+    percentage_var = variacao
+  ) |>
+  filter(absolute_diff > 0)
+
+table2 |>
+  slice_max(order_by = absolute_diff, n = 25) |>
+  ggplot(aes(x = reorder(occupation, absolute_diff), y = absolute_diff, fill = group_name)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Top 25 Ocupações com Maior Crescimento Absoluto (2003–2018)",
+    x = "Família Ocupacional",
+    y = "Crescimento Absoluto de Vínculos",
+    fill = "Grande Grupo"
+  ) +
+  theme_minimal()
+```
+
+## Tabela 3: Top 25 Ocupações com Maior Queda Absoluta
+
+```{r}
+table3 <- data |>
+  rename(
+    year = ano,
+    occupation = ocupacao,
+    links_2018 = vinculos2018,
+    links_2003 = vinculos2003,
+    group_code = codigo_gg,
+    group_name = grande_grupo,
+    absolute_diff = diferenca,
+    percentage_var = variacao
+  ) |>
+  filter(absolute_diff < 0)
+
+table3 |>
+  slice_min(order_by = absolute_diff, n = 25) |>
+  ggplot(aes(x = reorder(occupation, absolute_diff), y = absolute_diff, fill = group_name)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Top 25 Ocupações com Maior Queda Absoluta (2003–2018)",
+    x = "Família Ocupacional",
+    y = "Redução Absoluta de Vínculos",
+    fill = "Grande Grupo"
+  ) +
+  theme_minimal()
+```
+
+## 🔎 Interpretação Inicial
+
+> A Tabela 2 revela forte crescimento em áreas ligadas à **educação**, como professores e pedagogos, além de ocupações técnicas e analistas. Esses dados fortalecem a argumentação apresentada no ensaio sobre a priorização de perfis qualificados.
+
+> Já a Tabela 3 expõe reduções marcantes em ocupações **operacionais**, como motoristas, vigilantes, cozinheiros e médicos clínicos. Esse padrão pode estar associado à **modernização administrativa** e à adoção de tecnologias no setor público — hipótese discutida na terceira seção do ensaio.
+
+## 🔗 Conexão com o Ensaio
+
+As visualizações obtidas a partir das Tabelas 2 e 3 reforçam a leitura feita no ensaio quanto à reorganização ocupacional no Executivo Federal. O crescimento de funções técnicas e o encolhimento de atividades operacionais sustentam a hipótese de transformação funcional e foco em competências especializadas no serviço público entre 2003 e 2018.
